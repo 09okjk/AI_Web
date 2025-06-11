@@ -46,7 +46,7 @@ npm run dev
 
 ### 4. 访问应用
 
-打开浏览器访问: [http://localhost:3000](http://localhost:3000)
+打开浏览器访问: [http://localhost:5173](http://localhost:5173)
 
 #### 项目结构
 

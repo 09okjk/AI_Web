@@ -54,17 +54,17 @@ local_ip=$(get_local_ip)
 
 # 启动开发服务器
 echo "🌐 启动前端开发服务器..."
-echo "📍 本地地址: http://localhost:3000"
+echo "📍 本地地址: http://localhost:5173"
 if [ "$local_ip" != "无法获取IP" ]; then
-    echo "🌍 局域网地址: http://$local_ip:3000"
-    echo "📱 移动设备可访问: http://$local_ip:3000"
+    echo "🌍 局域网地址: http://$local_ip:5173"
+    echo "📱 移动设备可访问: http://$local_ip:5173"
 else
-    echo "🌍 局域网地址: http://192.168.x.x:3000 (请用实际IP替换)"
+    echo "🌍 局域网地址: http://192.168.x.x:5173 (请用实际IP替换)"
 fi
 echo "🔗 API代理: http://localhost:8000"
 echo ""
 echo "📝 注意事项:"
-echo "   - 确保防火墙允许3000端口访问"
+echo "   - 确保防火墙允许5173端口访问"
 echo "   - 确保设备在同一局域网内"
 echo "   - 后端服务需要在8000端口运行"
 echo ""
