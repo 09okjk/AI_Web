@@ -41,10 +41,32 @@ if [ "$backend_status" != "200" ]; then
     echo ""
 fi
 
+# 获取本机IP地址
+get_local_ip() {
+    # 尝试获取主要网络接口的IP
+    ip route get 1.1.1.1 2>/dev/null | grep -oP 'src \K\S+' 2>/dev/null || \
+    hostname -I 2>/dev/null | awk '{print $1}' || \
+    ip addr show | grep 'inet ' | grep -v '127.0.0.1' | head -n1 | awk '{print $2}' | cut -d/ -f1 || \
+    echo "无法获取IP"
+}
+
+local_ip=$(get_local_ip)
+
 # 启动开发服务器
 echo "🌐 启动前端开发服务器..."
-echo "📍 地址: http://localhost:3000"
+echo "📍 本地地址: http://localhost:3000"
+if [ "$local_ip" != "无法获取IP" ]; then
+    echo "🌍 局域网地址: http://$local_ip:3000"
+    echo "📱 移动设备可访问: http://$local_ip:3000"
+else
+    echo "🌍 局域网地址: http://192.168.x.x:3000 (请用实际IP替换)"
+fi
 echo "🔗 API代理: http://localhost:8000"
+echo ""
+echo "📝 注意事项:"
+echo "   - 确保防火墙允许3000端口访问"
+echo "   - 确保设备在同一局域网内"
+echo "   - 后端服务需要在8000端口运行"
 echo ""
 echo "按 Ctrl+C 停止服务器"
 echo ""
