@@ -7,7 +7,6 @@ import {
   RobotOutlined,
   DatabaseOutlined,
   MessageOutlined,
-  SettingOutlined,
 } from '@ant-design/icons';
 import { useAppStore } from '@/stores/useAppStore';
 import { systemAPI } from '@/services/api';
