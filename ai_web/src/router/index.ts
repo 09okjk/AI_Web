@@ -1,8 +1,7 @@
-import * as VueRouter from 'vue-router'
-const { createRouter, createWebHistory } = VueRouter
+import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
@@ -11,7 +10,7 @@ const router = createRouter({
     {
       path: '/list',
       name: 'DocumentList',
-      component: () => import('../views/DocumentList.vue'),
+      component: () => import('@/views/DocumentList.vue'),
       meta: {
         title: '文档列表'
       }
@@ -19,7 +18,7 @@ const router = createRouter({
     {
       path: '/editor',
       name: 'DocumentEditor',
-      component: () => import('../views/DocumentEditor.vue'),
+      component: () => import('@/views/DocumentEditor.vue'),
       meta: {
         title: '新建文档'
       }
@@ -27,7 +26,7 @@ const router = createRouter({
     {
       path: '/editor/:id',
       name: 'DocumentEditorEdit',
-      component: () => import('../views/DocumentEditor.vue'),
+      component: () => import('@/views/DocumentEditor.vue'),
       meta: {
         title: '编辑文档'
       }

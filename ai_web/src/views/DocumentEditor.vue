@@ -43,7 +43,10 @@
             <!-- 上半部分：图片 -->
             <div class="image-section">
               <div v-if="currentNode.image" class="image-display">
-                <img :src="`data:${currentNode.image_mimetype};base64,${currentNode.image}`" alt="节点图片" />
+                <img 
+                  :src="`data:${currentNode.image_mimetype || 'image/jpeg'};base64,${currentNode.image}`" 
+                  alt="节点图片" 
+                />
                 <div class="image-actions">
                   <el-button size="small" @click="removeImage">删除图片</el-button>
                   <el-button size="small" @click="$refs.fileInput.click()">更换图片</el-button>
@@ -55,10 +58,12 @@
                   :before-upload="handleImageUpload"
                   accept="image/*"
                   drag
+                  class="upload-dragger"
                 >
                   <div class="upload-content">
-                    <i class="el-icon-upload"></i>
+                    <div class="upload-icon">📁</div>
                     <div>点击或拖拽上传图片</div>
+                    <div class="upload-hint">支持 JPG、PNG、GIF 格式，大小不超过 5MB</div>
                   </div>
                 </el-upload>
               </div>
@@ -76,6 +81,7 @@
             </div>
           </div>
           <div v-else class="empty-state">
+            <div class="empty-icon">📝</div>
             <p>请选择或创建一个节点</p>
           </div>
         </div>
@@ -84,10 +90,20 @@
         <div class="right-panel">
           <h3>节点操作</h3>
           <div class="node-actions">
-            <el-button type="primary" @click="addNextNode" :disabled="!canAddNode">
+            <el-button 
+              type="primary" 
+              @click="addNextNode" 
+              :disabled="!canAddNode"
+              style="width: 100%; margin-bottom: 8px;"
+            >
               添加下一节点
             </el-button>
-            <el-button v-if="currentNode" type="danger" @click="deleteCurrentNode">
+            <el-button 
+              v-if="currentNode" 
+              type="danger" 
+              @click="deleteCurrentNode"
+              style="width: 100%;"
+            >
               删除当前节点
             </el-button>
           </div>
@@ -105,27 +121,52 @@
                 />
               </el-form-item>
               <el-form-item label="标签">
-                <el-tag
-                  v-for="tag in document.tags"
-                  :key="tag"
-                  closable
-                  @close="removeTag(tag)"
-                  style="margin-right: 8px; margin-bottom: 8px;"
-                >
-                  {{ tag }}
-                </el-tag>
-                <el-input
-                  v-if="inputVisible"
-                  ref="SaveTagInput"
-                  v-model="inputValue"
-                  size="small"
-                  style="width: 100px;"
-                  @keyup.enter="handleInputConfirm"
-                  @blur="handleInputConfirm"
-                />
-                <el-button v-else size="small" @click="showInput">+ 新标签</el-button>
+                <div class="tags-container">
+                  <el-tag
+                    v-for="tag in document.tags"
+                    :key="tag"
+                    closable
+                    @close="removeTag(tag)"
+                    style="margin-right: 8px; margin-bottom: 8px;"
+                  >
+                    {{ tag }}
+                  </el-tag>
+                  <el-input
+                    v-if="inputVisible"
+                    ref="SaveTagInput"
+                    v-model="inputValue"
+                    size="small"
+                    style="width: 100px;"
+                    @keyup.enter="handleInputConfirm"
+                    @blur="handleInputConfirm"
+                  />
+                  <el-button v-else size="small" @click="showInput">+ 新标签</el-button>
+                </div>
               </el-form-item>
             </el-form>
+          </div>
+  
+          <!-- 文档统计 -->
+          <div class="document-stats">
+            <h4>文档统计</h4>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-number">{{ document.data_list.length }}</div>
+                <div class="stat-label">总节点</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ document.data_list.filter(item => item.image).length }}</div>
+                <div class="stat-label">图片节点</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ document.data_list.filter(item => item.text.trim()).length }}</div>
+                <div class="stat-label">文本节点</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ document.tags.length }}</div>
+                <div class="stat-label">标签数</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -142,7 +183,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
+  import { ref, reactive, computed, onMounted, nextTick } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { DataService, type DataDocument, type DataItemContent } from '@/services/api'
@@ -344,8 +385,11 @@
   const showInput = () => {
     inputVisible.value = true
     nextTick(() => {
-      const input = document.querySelector('.el-input__inner') as HTMLInputElement
-      input?.focus()
+      // 简化focus逻辑
+      setTimeout(() => {
+        const input = document.querySelector('.el-input__inner') as HTMLInputElement
+        input?.focus()
+      }, 100)
     })
   }
   
@@ -525,11 +569,18 @@
     align-items: center;
     justify-content: center;
     color: #909399;
+    padding: 40px 20px;
   }
   
-  .upload-content i {
+  .upload-icon {
     font-size: 48px;
     margin-bottom: 16px;
+  }
+  
+  .upload-hint {
+    font-size: 12px;
+    color: #c0c4cc;
+    margin-top: 8px;
   }
   
   .text-section {
@@ -540,10 +591,16 @@
   .empty-state {
     height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     color: #909399;
     font-size: 16px;
+  }
+  
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
   }
   
   .right-panel {
@@ -553,6 +610,9 @@
     padding: 16px;
     overflow-y: auto;
     background: #fafbfc;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
   }
   
   .right-panel h3,
@@ -564,13 +624,46 @@
   .node-actions {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 24px;
   }
   
   .document-info {
     border-top: 1px solid #e1e8ed;
     padding-top: 16px;
+  }
+  
+  .tags-container {
+    min-height: 32px;
+  }
+  
+  .document-stats {
+    border-top: 1px solid #e1e8ed;
+    padding-top: 16px;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .stat-item {
+    text-align: center;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e1e8ed;
+  }
+  
+  .stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #409eff;
+    margin-bottom: 4px;
+  }
+  
+  .stat-label {
+    font-size: 12px;
+    color: #909399;
   }
   
   /* Element Plus 样式覆盖 */
@@ -579,9 +672,44 @@
     height: 100%;
     border: none;
     border-radius: 6px;
+    padding: 0;
   }
   
   :deep(.el-textarea__inner) {
     resize: none;
+  }
+  
+  /* 响应式设计 */
+  @media (max-width: 1200px) {
+    .main-content {
+      flex-direction: column;
+    }
+    
+    .left-panel,
+    .right-panel {
+      width: 100%;
+      max-height: 200px;
+    }
+    
+    .center-panel {
+      min-height: 500px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .header {
+      flex-direction: column;
+      gap: 16px;
+      align-items: stretch;
+    }
+    
+    .header-actions {
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .header-actions .el-input {
+      width: 100% !important;
+    }
   }
   </style>

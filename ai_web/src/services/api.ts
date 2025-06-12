@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // API基础配置
-const API_BASE_URL = 'http://localhost:8000' // 根据您的后端地址调整
+const API_BASE_URL = 'http://192.168.18.122:8000' // 根据您的后端地址调整
 
 const api = axios.create({
   baseURL: API_BASE_URL,

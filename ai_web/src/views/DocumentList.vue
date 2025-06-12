@@ -85,7 +85,7 @@
             <div class="card-actions" @click.stop>
               <el-dropdown>
                 <el-button type="text" size="small">
-                  <i class="el-icon-more"></i>
+                  ⋯
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
@@ -157,12 +157,10 @@
           <div class="card-footer">
             <div class="document-stats">
               <span class="stat-item">
-                <i class="el-icon-picture"></i>
-                {{ document.data_list.filter(item => item.image).length }}
+                🖼️ {{ document.data_list.filter(item => item.image).length }}
               </span>
               <span class="stat-item">
-                <i class="el-icon-document"></i>
-                {{ document.data_list.filter(item => item.text.trim()).length }}
+                📄 {{ document.data_list.filter(item => item.text.trim()).length }}
               </span>
             </div>
             <div class="document-meta">
@@ -177,7 +175,7 @@
       <!-- 空状态 -->
       <div v-if="!loading && documents.length === 0" class="empty-state">
         <div class="empty-content">
-          <i class="el-icon-document"></i>
+          <div class="empty-icon">📄</div>
           <h3>暂无数据文档</h3>
           <p>点击"新建文档"开始创建您的第一个数据文档</p>
           <el-button type="primary" @click="createDocument">
@@ -202,7 +200,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, reactive, onMounted, computed } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { DataService, type DataDocument } from '@/services/api'
@@ -262,7 +260,6 @@
   
   const handleSearch = async () => {
     if (!searchQuery.value.trim()) {
-      // 如果搜索为空，重新加载所有文档
       await loadDocuments()
       return
     }
@@ -565,10 +562,6 @@
     color: #909399;
   }
   
-  .stat-item i {
-    font-size: 14px;
-  }
-  
   .document-meta {
     text-align: right;
   }
@@ -590,7 +583,7 @@
     color: #909399;
   }
   
-  .empty-content i {
+  .empty-icon {
     font-size: 64px;
     margin-bottom: 16px;
     color: #c0c4cc;
