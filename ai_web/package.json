@@ -14,7 +14,10 @@
     "lint": "run-s lint:*"
   },
   "dependencies": {
-    "vue": "^3.5.13"
+    "axios": "^1.9.0",
+    "element-plus": "^2.10.1",
+    "vue": "^3.2.0",
+    "vue-router": "^4.0.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.1",
