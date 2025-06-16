@@ -5,7 +5,7 @@ const API_BASE_URL = 'http://192.168.18.122:8000' // 根据您的后端地址调
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 300000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -41,6 +41,15 @@ export interface DataDocumentListResponse {
   page: number
   page_size: number
   total_pages: number
+}
+
+// PPT导入响应类型
+export interface PPTImportResponse {
+  success: boolean
+  message: string
+  document_id: string
+  document_name: string
+  slides_count: number
 }
 
 // API服务类
@@ -131,5 +140,25 @@ export class DataService {
   static async deleteDataItem(documentId: string, sequence: number): Promise<{ message: string; success: boolean }> {
     const response = await api.delete(`/api/data/documents/${documentId}/items/${sequence}`)
     return response.data
+  }
+
+  // PPT导入
+  static async importPPTDocument(formData: FormData): Promise<PPTImportResponse> {
+    return await api.post('/api/data/ppt-import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 600000, // 10分钟超时，适应AI处理时间
+    })
+  }
+
+  // PPT处理器健康检查
+  static async checkPPTProcessorHealth(): Promise<{
+    ppt_processor: {
+      healthy: boolean
+      message?: string
+    }
+  }> {
+    return await api.get('/api/data/ppt-processor/health')
   }
 }
