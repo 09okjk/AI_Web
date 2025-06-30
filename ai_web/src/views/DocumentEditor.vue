@@ -79,6 +79,36 @@
                 @input="onNodeContentChange"
               />
             </div>
+
+            <!-- 配置选项 -->
+            <div class="config-section">
+              <div class="config-row">
+                <div class="config-item">
+                  <label class="config-label">相机类型</label>
+                  <el-select
+                    v-model="currentNode.camera_type"
+                    placeholder="请选择相机类型"
+                    style="width: 100%;"
+                    @change="onNodeContentChange"
+                  >
+                    <el-option
+                      v-for="option in cameraTypeOptions"
+                      :key="option.value"
+                      :label="option.label"
+                      :value="option.value"
+                    />
+                  </el-select>
+                </div>
+                <div class="config-item">
+                  <label class="config-label">主持人动画</label>
+                  <el-input
+                    v-model="currentNode.host_animation"
+                    placeholder="请输入主持人动画..."
+                    @input="onNodeContentChange"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else class="empty-state">
             <div class="empty-icon">📝</div>
@@ -186,7 +216,7 @@
   import { ref, reactive, computed, onMounted, nextTick } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import { DataService, type DataDocument, type DataItemContent } from '@/services/api'
+  import { DataService, type DataDocument, type DataItemContent, CameraType } from '@/services/api'
   
   const route = useRoute()
   const router = useRouter()
@@ -211,13 +241,31 @@
   
   // 计算属性
   const currentNode = computed(() => {
-    return document.data_list[currentNodeIndex.value] || null
+    const node = document.data_list[currentNodeIndex.value] || null
+    if (node) {
+      // 确保新字段存在
+      if (node.camera_type === undefined) {
+        node.camera_type = CameraType.None
+      }
+      if (node.host_animation === undefined) {
+        node.host_animation = ''
+      }
+    }
+    return node
   })
-  
+
   const canAddNode = computed(() => {
     return document.data_list.length === 0 || 
            (currentNode.value && (currentNode.value.text.trim() || currentNode.value.image))
   })
+
+  // 相机类型选项
+  const cameraTypeOptions = computed(() => [
+    { label: '无摄像头', value: CameraType.None },
+    { label: '主摄像头', value: CameraType.MainCamera },
+    { label: '远景摄像头', value: CameraType.FarCamera },
+    { label: '跟随摄像头', value: CameraType.FollowCamera }
+  ])
   
   // 生命周期
   onMounted(async () => {
@@ -234,6 +282,17 @@
     try {
       const data = await DataService.getDocument(documentId.value!)
       Object.assign(document, data)
+      
+      // 确保新字段的向后兼容性
+      document.data_list.forEach(item => {
+        if (item.camera_type === undefined) {
+          item.camera_type = CameraType.None
+        }
+        if (item.host_animation === undefined) {
+          item.host_animation = ''
+        }
+      })
+      
       if (document.data_list.length > 0) {
         currentNodeIndex.value = 0
       }
@@ -280,7 +339,9 @@
       text: '',
       image: undefined,
       image_filename: undefined,
-      image_mimetype: undefined
+      image_mimetype: undefined,
+      camera_type: CameraType.None,
+      host_animation: ''
     }
     document.data_list.push(newNode)
     currentNodeIndex.value = 0
@@ -288,14 +349,16 @@
   
   const addNextNode = () => {
     if (!canAddNode.value) return
-  
+
     const newSequence = Math.max(...document.data_list.map(item => item.sequence)) + 1
     const newNode: DataItemContent = {
       sequence: newSequence,
       text: '',
       image: undefined,
       image_filename: undefined,
-      image_mimetype: undefined
+      image_mimetype: undefined,
+      camera_type: CameraType.None,
+      host_animation: ''
     }
     
     document.data_list.push(newNode)
@@ -586,6 +649,29 @@
   .text-section {
     flex: 1;
     min-height: 200px;
+  }
+
+  .config-section {
+    flex-shrink: 0;
+    margin-top: 16px;
+  }
+
+  .config-row {
+    display: flex;
+    gap: 16px;
+  }
+
+  .config-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .config-label {
+    font-size: 14px;
+    color: #606266;
+    margin-bottom: 8px;
+    font-weight: 500;
   }
   
   .empty-state {
