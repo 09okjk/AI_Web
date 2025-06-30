@@ -31,7 +31,15 @@
               <div class="node-number">{{ item.sequence }}</div>
               <div class="node-preview">
                 <div class="text-preview">{{ item.text || '空文本' }}</div>
-                <div v-if="item.image" class="image-indicator">🖼️</div>
+                <div class="meta-info">
+                  <div v-if="item.image" class="image-indicator">🖼️</div>
+                  <div v-if="item.camera_type !== undefined && item.camera_type !== 0" class="camera-indicator">
+                    📹 {{ getCameraTypeLabel(item.camera_type) }}
+                  </div>
+                  <div v-if="item.host_animation" class="animation-indicator">
+                    🎭 {{ item.host_animation }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -68,7 +76,35 @@
                 </el-upload>
               </div>
             </div>
-  
+
+            <!-- 中间部分：相机类型和主持人动画配置 -->
+            <div class="config-section">
+              <div class="config-row">
+                <div class="config-item">
+                  <label class="config-label">相机类型</label>
+                  <el-select 
+                    v-model="currentNode.camera_type" 
+                    placeholder="选择相机类型"
+                    style="width: 100%;"
+                    @change="onNodeContentChange"
+                  >
+                    <el-option label="无摄像头" :value="0" />
+                    <el-option label="主摄像头" :value="1" />
+                    <el-option label="远景摄像头" :value="2" />
+                    <el-option label="跟随摄像头" :value="3" />
+                  </el-select>
+                </div>
+                <div class="config-item">
+                  <label class="config-label">主持人动画</label>
+                  <el-input
+                    v-model="currentNode.host_animation"
+                    placeholder="请输入主持人动画..."
+                    @input="onNodeContentChange"
+                  />
+                </div>
+              </div>
+            </div>
+
             <!-- 下半部分：文本输入 -->
             <div class="text-section">
               <el-input
@@ -218,6 +254,17 @@
     return document.data_list.length === 0 || 
            (currentNode.value && (currentNode.value.text.trim() || currentNode.value.image))
   })
+
+  // 辅助函数
+  const getCameraTypeLabel = (cameraType?: number) => {
+    const labels: Record<number, string> = {
+      0: '无摄像头',
+      1: '主摄像头',
+      2: '远景摄像头',
+      3: '跟随摄像头'
+    }
+    return labels[cameraType ?? 0] || '无摄像头'
+  }
   
   // 生命周期
   onMounted(async () => {
@@ -280,7 +327,9 @@
       text: '',
       image: undefined,
       image_filename: undefined,
-      image_mimetype: undefined
+      image_mimetype: undefined,
+      camera_type: 0, // 默认为无摄像头
+      host_animation: '' // 默认为空字符串
     }
     document.data_list.push(newNode)
     currentNodeIndex.value = 0
@@ -288,14 +337,16 @@
   
   const addNextNode = () => {
     if (!canAddNode.value) return
-  
+
     const newSequence = Math.max(...document.data_list.map(item => item.sequence)) + 1
     const newNode: DataItemContent = {
       sequence: newSequence,
       text: '',
       image: undefined,
       image_filename: undefined,
-      image_mimetype: undefined
+      image_mimetype: undefined,
+      camera_type: 0, // 默认为无摄像头
+      host_animation: '' // 默认为空字符串
     }
     
     document.data_list.push(newNode)
@@ -510,6 +561,22 @@
     font-size: 12px;
     color: #909399;
   }
+
+  .meta-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .camera-indicator,
+  .animation-indicator {
+    font-size: 12px;
+    color: #909399;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
   
   .center-panel {
     flex: 1;
@@ -586,6 +653,29 @@
   .text-section {
     flex: 1;
     min-height: 200px;
+  }
+
+  .config-section {
+    padding: 12px 0;
+    border-top: 1px solid #e1e8ed;
+    border-bottom: 1px solid #e1e8ed;
+  }
+
+  .config-row {
+    display: flex;
+    gap: 16px;
+  }
+
+  .config-item {
+    flex: 1;
+  }
+
+  .config-label {
+    display: block;
+    font-size: 14px;
+    color: #606266;
+    margin-bottom: 8px;
+    font-weight: 500;
   }
   
   .empty-state {

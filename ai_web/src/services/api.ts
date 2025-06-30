@@ -18,6 +18,8 @@ export interface DataItemContent {
   image?: string // base64编码
   image_filename?: string
   image_mimetype?: string
+  camera_type?: number // 相机类型：0=无摄像头, 1=主摄像头, 2=远景摄像头, 3=跟随摄像头
+  host_animation?: string // 主持人动画
 }
 
 // 数据文档接口
