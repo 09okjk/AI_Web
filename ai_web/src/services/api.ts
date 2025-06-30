@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // 创建axios实例
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8000',
+  baseURL: process.env.NODE_ENV === 'production' ? '/api' : 'http://192.168.18.122:8000',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
@@ -23,6 +23,20 @@ export const CAMERA_TYPE_OPTIONS = [
   { label: '主摄像头', value: CameraType.MainCamera },
   { label: '远景摄像头', value: CameraType.FarCamera },
   { label: '跟随摄像头', value: CameraType.FollowCamera }
+]
+
+// 主持人动画枚举
+export enum HostAnimation {
+  None = '0',           // 无动画
+  Talking = '1',        // 说话动画
+  WalkingWithTalking = '2', // 走动并说话动画
+}
+
+// 主持人动画选项
+export const HOST_ANIMATION_OPTIONS = [
+  { label: '无动画', value: HostAnimation.None },
+  { label: '说话动画', value: HostAnimation.Talking },
+  { label: '走路并说话动画', value: HostAnimation.WalkingWithTalking }
 ]
 
 // 数据项内容接口

@@ -101,11 +101,19 @@
               </div>
               <div class="config-item">
                 <label class="config-label">主持人动画</label>
-                <el-input
+                <el-select
                   v-model="currentNode.host_animation"
-                  placeholder="请输入主持人动画"
-                  @input="onNodeContentChange"
-                />
+                  placeholder="请选择主持人动画"
+                  style="width: 100%;"
+                  @change="onNodeContentChange"
+                >
+                  <el-option
+                    v-for="option in hostAnimationOptions"
+                    :key="option.value"
+                    :label="option.label"
+                    :value="option.value"
+                  />
+                </el-select>
               </div>
             </div>
           </div>
@@ -216,7 +224,7 @@
 import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { DataService, type DataDocument, type DataItemContent, CameraType, CAMERA_TYPE_OPTIONS } from '@/services/api'
+import { DataService, type DataDocument, type DataItemContent, CameraType, CAMERA_TYPE_OPTIONS, HostAnimation, HOST_ANIMATION_OPTIONS } from '@/services/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -241,6 +249,9 @@ const inputValue = ref('')
 
 // 相机类型选项
 const cameraTypeOptions = CAMERA_TYPE_OPTIONS
+
+// 主持人动画选项
+const hostAnimationOptions = HOST_ANIMATION_OPTIONS
 
 // 计算属性
 const currentNode = computed(() => {
@@ -315,7 +326,7 @@ const addFirstNode = () => {
     image_filename: undefined,
     image_mimetype: undefined,
     camera_type: CameraType.None,  // 默认无摄像头
-    host_animation: ''  // 默认空字符串
+    host_animation: HostAnimation.None  // 默认空字符串
   }
   document.data_list.push(newNode)
   currentNodeIndex.value = 0
@@ -332,7 +343,7 @@ const addNextNode = () => {
     image_filename: undefined,
     image_mimetype: undefined,
     camera_type: CameraType.None,  // 默认无摄像头
-    host_animation: ''  // 默认空字符串
+    host_animation: HostAnimation.None  // 默认空字符串
   }
   
   document.data_list.push(newNode)
