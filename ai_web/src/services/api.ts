@@ -1,15 +1,29 @@
 import axios from 'axios'
 
-// API基础配置
-const API_BASE_URL = 'http://192.168.18.122:8000' // 根据您的后端地址调整
-
+// 创建axios实例
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 300000,
+  baseURL: process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:8000',
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
   }
 })
+
+// 相机类型枚举
+export enum CameraType {
+  None = '0',           // 无摄像头
+  MainCamera = '1',     // 主摄像头
+  FarCamera = '2',      // 远景摄像头
+  FollowCamera = '3'    // 跟随摄像头
+}
+
+// 相机类型选项
+export const CAMERA_TYPE_OPTIONS = [
+  { label: '无摄像头', value: CameraType.None },
+  { label: '主摄像头', value: CameraType.MainCamera },
+  { label: '远景摄像头', value: CameraType.FarCamera },
+  { label: '跟随摄像头', value: CameraType.FollowCamera }
+]
 
 // 数据项内容接口
 export interface DataItemContent {
@@ -18,6 +32,8 @@ export interface DataItemContent {
   image?: string // base64编码
   image_filename?: string
   image_mimetype?: string
+  camera_type?: string  // 相机类型
+  host_animation?: string  // 主持人动画
 }
 
 // 数据文档接口
@@ -131,7 +147,7 @@ export class DataService {
   }
 
   // 更新数据项
-  static async updateDataItem(documentId: string, sequence: number, item: DataItemContent): Promise<{ message: string; success: boolean }> {
+  static async updateDataItem(documentId: string, sequence: number, item: Partial<DataItemContent>): Promise<{ message: string; success: boolean }> {
     const response = await api.put(`/api/data/documents/${documentId}/items/${sequence}`, item)
     return response.data
   }
@@ -143,22 +159,18 @@ export class DataService {
   }
 
   // PPT导入
-  static async importPPTDocument(formData: FormData): Promise<PPTImportResponse> {
-    return await api.post('/api/data/ppt-import', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      timeout: 600000, // 10分钟超时，适应AI处理时间
-    })
-  }
-
-  // PPT处理器健康检查
-  static async checkPPTProcessorHealth(): Promise<{
-    ppt_processor: {
-      healthy: boolean
-      message?: string
+  static async importPPT(file: File, name?: string): Promise<PPTImportResponse> {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (name) {
+      formData.append('name', name)
     }
-  }> {
-    return await api.get('/api/data/ppt-processor/health')
+    
+    const response = await api.post('/api/data/import-ppt', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    return response.data
   }
 }
