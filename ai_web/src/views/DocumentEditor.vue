@@ -797,5 +797,10 @@
     .header-actions .el-input {
       width: 100% !important;
     }
+    
+    .config-row {
+      flex-direction: column;
+      gap: 12px;
+    }
   }
   </style>
